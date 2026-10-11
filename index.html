@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finora | Smart Budget Planner</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+
+<body>
+
+<!-- ===========================
+     LOGIN SCREEN
+=========================== -->
+<div class="login-screen" id="loginScreen">
+    <div class="login-card">
+
+        <div class="login-brand">
+            <div class="login-brand-icon"><i class="fa-solid fa-wallet"></i></div>
+            <h1>finora</h1>
+            <p>Smart Budget Planner</p>
+        </div>
+
+        <!-- Step 1 -->
+        <div class="login-step" id="loginStep1">
+            <h2>Welcome! Sign in to continue</h2>
+            <p class="login-sub">Choose how you'd like to get started</p>
+            <div class="login-options">
+                <button class="login-option-btn" id="gmailLoginBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    Continue with Gmail
+                </button>
+                <div class="login-divider"><span>or</span></div>
+                <button class="login-option-btn phone-btn" id="phoneLoginBtn">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                    Continue with Phone Number
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 2a: Gmail -->
+        <div class="login-step hidden" id="loginStep2Gmail">
+            <button class="back-btn" id="backFromGmail"><i class="fa-solid fa-arrow-left"></i> Back</button>
+            <h2>Enter your Gmail</h2>
+            <p class="login-sub">We'll send a verification code to this address</p>
+            <div class="form-group">
+                <label for="gmailInput">Gmail Address</label>
+                <input type="email" id="gmailInput" placeholder="you@gmail.com" autocomplete="email">
+                <span class="input-error" id="gmailError"></span>
+            </div>
+            <button class="primary-button full-width" id="sendGmailOtpBtn">
+                <i class="fa-solid fa-paper-plane"></i> Send OTP
+            </button>
+        </div>
+
+        <!-- Step 2b: Phone -->
+        <div class="login-step hidden" id="loginStep2Phone">
+            <button class="back-btn" id="backFromPhone"><i class="fa-solid fa-arrow-left"></i> Back</button>
+            <h2>Enter your Phone Number</h2>
+            <p class="login-sub">We'll send a 6-digit verification code via SMS</p>
+            <div class="form-group">
+                <label for="phoneInput">Phone Number</label>
+                <div class="phone-input-wrapper">
+                    <span class="phone-prefix">+91</span>
+                    <input type="tel" id="phoneInput" placeholder="98765 43210" maxlength="10" autocomplete="tel">
+                </div>
+                <span class="input-error" id="phoneError"></span>
+            </div>
+            <button class="primary-button full-width" id="sendPhoneOtpBtn">
+                <i class="fa-solid fa-paper-plane"></i> Send OTP
+            </button>
+        </div>
+
+        <!-- Step 3: OTP -->
+        <div class="login-step hidden" id="loginStep3">
+            <button class="back-btn" id="backFromOtp"><i class="fa-solid fa-arrow-left"></i> Back</button>
+            <h2>Enter the OTP</h2>
+            <p class="login-sub" id="otpSubText">A 6-digit code has been sent</p>
+            <div class="otp-display-box" id="otpDisplayBox">
+                <i class="fa-solid fa-key"></i>
+                <span id="simulatedOtpText">Your OTP will appear here</span>
+            </div>
+            <div class="form-group">
+                <label>Verification Code</label>
+                <div class="otp-inputs" id="otpInputs">
+                    <input type="text" maxlength="1" class="otp-box" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="otp-box" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="otp-box" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="otp-box" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="otp-box" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="otp-box" inputmode="numeric" pattern="[0-9]">
+                </div>
+                <span class="input-error" id="otpError"></span>
+            </div>
+            <button class="primary-button full-width" id="verifyOtpBtn">
+                <i class="fa-solid fa-shield-halved"></i> Verify OTP
+            </button>
+            <button class="resend-btn" id="resendOtpBtn">
+                Didn't get the code? <strong>Resend OTP</strong>
+            </button>
+        </div>
+
+        <!-- Step 4: Name -->
+        <div class="login-step hidden" id="loginStep4">
+            <div class="success-badge"><i class="fa-solid fa-circle-check"></i></div>
+            <h2>Almost there!</h2>
+            <p class="login-sub">Tell us your name to personalize your experience</p>
+            <div class="form-group">
+                <label for="userNameInput">Your Name</label>
+                <input type="text" id="userNameInput" maxlength="50" placeholder="e.g. Karthik" autocomplete="name">
+                <span class="input-error" id="nameError"></span>
+            </div>
+            <button class="primary-button full-width" id="startAppBtn">
+                <i class="fa-solid fa-rocket"></i> Start Managing Finances
+            </button>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- ===========================
+     MAIN APP
+=========================== -->
+<div class="app-container" id="appContainer" style="display:none;">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="brand">
+            <div class="brand-icon"><i class="fa-solid fa-wallet"></i></div>
+            <div>
+                <h2>finora</h2>
+                <span>SMART FINANCE</span>
+            </div>
+        </div>
+
+        <div class="menu-label">WORKSPACE</div>
+
+        <nav class="navigation">
+            <a href="#dashboard" class="nav-link active" data-page="dashboard">
+                <i class="fa-solid fa-house"></i><span>Dashboard</span>
+            </a>
+            <a href="#transactions" class="nav-link" data-page="transactions">
+                <i class="fa-solid fa-arrow-right-arrow-left"></i><span>Transactions</span>
+            </a>
+            <a href="#budgets" class="nav-link" data-page="budgets">
+                <i class="fa-solid fa-chart-pie"></i><span>Budgets</span>
+            </a>
+            <a href="#goals" class="nav-link" data-page="goals">
+                <i class="fa-solid fa-bullseye"></i><span>Savings Goals</span>
+            </a>
+            <a href="#analytics" class="nav-link" data-page="analytics">
+                <i class="fa-solid fa-chart-line"></i><span>Analytics</span>
+            </a>
+            <a href="#reports" class="nav-link" data-page="reports">
+                <i class="fa-solid fa-file-lines"></i><span>Reports</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="sidebar-tip">
+                <div class="tip-icon"><i class="fa-solid fa-lightbulb"></i></div>
+                <h4>Smart money tip</h4>
+                <p>Track your spending today to build a better financial tomorrow.</p>
+            </div>
+
+            <button class="nav-link settings-button" id="themeToggle">
+                <i class="fa-solid fa-moon" id="themeIcon"></i>
+                <span>Toggle Theme</span>
+            </button>
+
+            <div class="profile" id="sidebarProfile">
+                <div class="avatar" id="sidebarAvatar">F</div>
+                <div class="profile-details">
+                    <strong id="sidebarName">My Finances</strong>
+                    <span id="sidebarContact">Personal Account</span>
+                </div>
+            </div>
+
+            <button class="nav-link logout-button" id="logoutButton">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="icon-button mobile-menu" id="menuToggle" aria-label="Toggle menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div>
+                    <p class="eyebrow" id="todayDate">YOUR FINANCIAL OVERVIEW</p>
+                    <h1 id="pageTitle">Dashboard</h1>
+                </div>
+            </div>
+
+            <div class="topbar-actions">
+                <div class="month-picker">
+                    <i class="fa-regular fa-calendar"></i>
+                    <input type="month" id="monthPicker" aria-label="Select month">
+                </div>
+
+                <button class="icon-button" id="notificationButton" aria-label="View notifications">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="notification-dot" style="display:none;"></span>
+                </button>
+
+                <!-- Feedback Button -->
+                <button class="icon-button" id="feedbackButton" aria-label="Send feedback" title="Send Feedback">
+                    <i class="fa-regular fa-comment-dots"></i>
+                </button>
+
+                <button class="primary-button" id="addTransactionButton">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Add Transaction</span>
+                </button>
+            </div>
+        </header>
+
+
+        <!-- DASHBOARD PAGE -->
+        <section class="page active" id="dashboard">
+            <div class="welcome-banner">
+                <div>
+                    <span class="welcome-label">YOUR MONEY, YOUR CONTROL</span>
+                    <h2 id="welcomeMessage">Make every rupee count.</h2>
+                    <p>Understand your spending. Reach your goals. Build better habits.</p>
+                </div>
+                <div class="welcome-art"><i class="fa-solid fa-coins"></i></div>
+            </div>
+
+            <div class="summary-grid">
+                <article class="summary-card balance-card">
+                    <div class="card-top">
+                        <span>Total Balance</span>
+                        <div class="card-icon"><i class="fa-solid fa-wallet"></i></div>
+                    </div>
+                    <h2 id="totalBalance">₹0.00</h2>
+                    <p class="card-description">Income minus expenses</p>
+                </article>
+
+                <article class="summary-card">
+                    <div class="card-top">
+                        <span>Total Income</span>
+                        <div class="card-icon income-icon"><i class="fa-solid fa-arrow-down"></i></div>
+                    </div>
+                    <h2 id="totalIncome">₹0.00</h2>
+                    <p class="card-description">Income this month</p>
+                </article>
+
+                <article class="summary-card">
+                    <div class="card-top">
+                        <span>Total Expenses</span>
+                        <div class="card-icon expense-icon"><i class="fa-solid fa-arrow-up"></i></div>
+                    </div>
+                    <h2 id="totalExpenses">₹0.00</h2>
+                    <p class="card-description">Spending this month</p>
+                </article>
+
+                <article class="summary-card">
+                    <div class="card-top">
+                        <span>Monthly Savings</span>
+                        <div class="card-icon savings-icon"><i class="fa-solid fa-piggy-bank"></i></div>
+                    </div>
+                    <h2 id="totalSavings">₹0.00</h2>
+                    <p class="card-description">Income remaining after expenses</p>
+                </article>
+            </div>
+
+            <div class="dashboard-grid">
+                <article class="panel budget-panel">
+                    <div class="panel-header">
+                        <div>
+                            <h3>Monthly Budget</h3>
+                            <p>Keep your spending on track</p>
+                        </div>
+                        <button class="text-button" id="editBudgetButton">
+                            <i class="fa-solid fa-pen"></i> Edit Budget
+                        </button>
+                    </div>
+                    <div class="budget-numbers">
+                        <div><span>Spent so far</span><h2 id="budgetSpent">₹0</h2></div>
+                        <div class="text-right"><span>Monthly limit</span><h2 id="budgetLimit">₹0</h2></div>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="budgetProgress"></div>
+                    </div>
+                    <div class="budget-footer">
+                        <span id="budgetPercentage">0% used</span>
+                        <span id="budgetRemaining">₹0 remaining</span>
+                    </div>
+                    <div class="alert-box" id="budgetAlert">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>You're ready to manage your budget.</span>
+                    </div>
+                </article>
+
+                <article class="panel insights-panel">
+                    <div class="panel-header">
+                        <div><h3>Smart Insights</h3><p>Understand your money habits</p></div>
+                        <div class="insight-heading-icon">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        </div>
+                    </div>
+                    <div id="insightsList" class="insights-list">
+                        <p class="empty-state">Add transactions to generate insights.</p>
+                    </div>
+                </article>
+            </div>
+
+            <div class="dashboard-grid chart-grid">
+                <article class="panel chart-panel">
+                    <div class="panel-header">
+                        <div><h3>Income vs Expenses</h3><p>Monthly financial overview</p></div>
+                    </div>
+                    <div class="chart-container"><canvas id="incomeExpenseChart"></canvas></div>
+                </article>
+
+                <article class="panel chart-panel">
+                    <div class="panel-header">
+                        <div><h3>Spending Breakdown</h3><p>Where your money goes</p></div>
+                    </div>
+                    <div class="chart-container doughnut-container">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </article>
+            </div>
+
+            <article class="panel transactions-panel">
+                <div class="panel-header">
+                    <div><h3>Recent Transactions</h3><p>Your latest financial activity</p></div>
+                    <button class="text-button" data-goto="transactions">
+                        View All <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>TRANSACTION</th><th>CATEGORY</th>
+                                <th>DATE</th><th>AMOUNT</th><th>ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentTransactions"></tbody>
+                    </table>
+                </div>
+            </article>
+        </section>
+
+
+        <!-- TRANSACTIONS PAGE -->
+        <section class="page" id="transactions">
+            <div class="section-heading">
+                <div>
+                    <h2>All Transactions</h2>
+                    <p>Manage your income, expenses and transfers.</p>
+                </div>
+                <button class="primary-button" id="transactionPageAdd">
+                    <i class="fa-solid fa-plus"></i> Add New
+                </button>
+            </div>
+
+            <article class="panel">
+                <div class="filters">
+                    <input type="search" id="searchInput" placeholder="Search transactions...">
+                    <select id="typeFilter" aria-label="Filter transaction type">
+                        <option value="all">All Types</option>
+                        <option value="income">Income</option>
+                        <option value="expense">Expense</option>
+                        <option value="transfer">Transfer</option>
+                    </select>
+                    <select id="categoryFilter" aria-label="Filter category">
+                        <option value="all">All Categories</option>
+                    </select>
+                    <select id="sortFilter" aria-label="Sort transactions">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="highest">Highest Amount</option>
+                        <option value="lowest">Lowest Amount</option>
+                    </select>
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>TRANSACTION</th><th>CATEGORY</th>
+                                <th>DATE</th><th>TYPE</th><th>AMOUNT</th><th>ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allTransactions"></tbody>
+                    </table>
+                </div>
+                <div class="table-footer" id="transactionCount"></div>
+            </article>
+        </section>
+
+
+        <!-- BUDGETS PAGE -->
+        <section class="page" id="budgets">
+            <div class="section-heading">
+                <div>
+                    <h2>Budget Planner</h2>
+                    <p>Set spending limits and manage your money wisely.</p>
+                </div>
+                <button class="primary-button" id="budgetPageEdit">
+                    <i class="fa-solid fa-pen"></i> Set Monthly Budget
+                </button>
+            </div>
+
+            <article class="panel">
+                <div class="panel-header">
+                    <div><h3>Budget Overview</h3><p id="budgetPageMonth">Current month</p></div>
+                </div>
+                <div class="budget-overview-grid">
+                    <div class="budget-stat"><span>Total Budget</span><h2 id="budgetOverviewLimit">₹0</h2></div>
+                    <div class="budget-stat"><span>Total Spent</span><h2 id="budgetOverviewSpent">₹0</h2></div>
+                    <div class="budget-stat"><span>Budget Remaining</span><h2 id="budgetOverviewRemaining">₹0</h2></div>
+                </div>
+            </article>
+
+            <article class="panel category-budget-panel">
+                <div class="panel-header">
+                    <div><h3>Category Budgets</h3><p>Set a separate limit for each expense category.</p></div>
+                </div>
+                <form id="categoryBudgetForm" class="inline-form">
+                    <select id="categoryBudgetCategory" required>
+                        <option value="Food">Food</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Shopping">Shopping</option>
+                        <option value="Education">Education</option>
+                        <option value="Bills">Bills</option>
+                        <option value="Health">Health</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <input type="number" id="categoryBudgetAmount" min="0.01" step="0.01" placeholder="Budget amount (₹)" required>
+                    <button class="primary-button" type="submit">Save Category Budget</button>
+                </form>
+                <div id="categoryBudgetsList" class="category-budgets-list"></div>
+            </article>
+        </section>
+
+
+        <!-- SAVINGS GOALS PAGE -->
+        <section class="page" id="goals">
+            <div class="section-heading">
+                <div>
+                    <h2>Savings Goals</h2>
+                    <p>Turn your financial dreams into achievable milestones.</p>
+                </div>
+                <button class="primary-button" id="addGoalButton">
+                    <i class="fa-solid fa-plus"></i> Create Goal
+                </button>
+            </div>
+            <div id="goalsGrid" class="goals-grid"></div>
+        </section>
+
+
+        <!-- ANALYTICS PAGE -->
+        <section class="page" id="analytics">
+            <div class="section-heading">
+                <div><h2>Financial Analytics</h2><p>Explore your spending patterns and financial progress.</p></div>
+            </div>
+            <div class="summary-grid analytics-summary">
+                <article class="summary-card">
+                    <span class="card-description">Selected Month Income</span>
+                    <h2 id="analyticsIncome">₹0</h2>
+                </article>
+                <article class="summary-card">
+                    <span class="card-description">Selected Month Expenses</span>
+                    <h2 id="analyticsExpenses">₹0</h2>
+                </article>
+                <article class="summary-card">
+                    <span class="card-description">Savings Rate</span>
+                    <h2 id="analyticsSavingsRate">0%</h2>
+                </article>
+                <article class="summary-card">
+                    <span class="card-description">Transactions</span>
+                    <h2 id="analyticsCount">0</h2>
+                </article>
+            </div>
+
+            <article class="panel chart-panel large-chart">
+                <div class="panel-header">
+                    <div><h3>Six-Month Financial Trends</h3><p>Income and expenses over time</p></div>
+                </div>
+                <div class="chart-container"><canvas id="trendChart"></canvas></div>
+            </article>
+
+            <article class="panel">
+                <div class="panel-header">
+                    <div><h3>Category Analysis</h3><p>Expense totals for the selected month</p></div>
+                </div>
+                <div id="categoryAnalysis"></div>
+            </article>
+        </section>
+
+
+        <!-- REPORTS PAGE -->
+        <section class="page" id="reports">
+            <div class="section-heading">
+                <div><h2>Monthly Reports</h2><p>Review and export your financial records.</p></div>
+                <div style="display:flex;gap:10px;">
+                    <button class="secondary-button" id="exportCsvButton">
+                        <i class="fa-solid fa-file-csv"></i> Export CSV
+                    </button>
+                    <button class="primary-button" id="exportExcelButton">
+                        <i class="fa-solid fa-file-excel"></i> Export Excel
+                    </button>
+                </div>
+            </div>
+
+            <article class="panel">
+                <div class="panel-header">
+                    <div><h3>Monthly Financial Summary</h3><p id="reportMonth">Selected month</p></div>
+                </div>
+                <div id="reportSummary" class="report-summary"></div>
+            </article>
+
+            <article class="panel">
+                <div class="panel-header">
+                    <div><h3>Financial Health Check</h3><p>A quick overview of your money management.</p></div>
+                </div>
+                <div id="financialHealth"></div>
+            </article>
+        </section>
+
+
+        <footer class="footer">
+            <p>© 2026 Finora. Built for smarter money management.</p>
+            <span>Your finances. Your future.</span>
+        </footer>
+    </main>
+
+</div>
+
+
+<!-- ===========================
+     ADD / EDIT TRANSACTION MODAL (New Design)
+=========================== -->
+<div class="modal-overlay" id="transactionModal">
+    <div class="modal txn-modal">
+
+        <!-- Modal Header -->
+        <div class="txn-modal-header">
+            <h2 id="transactionModalTitle">Add Transaction</h2>
+            <button class="icon-button close-modal" data-close="transactionModal" aria-label="Close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Type Tabs: Income | Expense | Transfer -->
+        <div class="txn-type-tabs">
+            <button class="txn-type-tab income-tab active" data-txn-tab="income">
+                <i class="fa-solid fa-arrow-down"></i> Income
+            </button>
+            <button class="txn-type-tab expense-tab" data-txn-tab="expense">
+                <i class="fa-solid fa-arrow-up"></i> Expense
+            </button>
+            <button class="txn-type-tab transfer-tab" data-txn-tab="transfer">
+                <i class="fa-solid fa-right-left"></i> Transfer
+            </button>
+        </div>
+
+        <form id="transactionForm">
+            <input type="hidden" id="transactionId">
+            <input type="hidden" id="hiddenTxnType" value="income">
+
+            <!-- Big Amount Input -->
+            <div class="txn-amount-section" id="amountSection">
+                <span class="txn-currency">₹</span>
+                <input type="number" id="transactionAmount" class="txn-amount-input"
+                       min="0.01" max="1000000000" step="0.01"
+                       placeholder="0.00" required>
+            </div>
+
+            <!-- Date -->
+            <div class="txn-field-group">
+                <div class="txn-field-icon-wrap">
+                    <i class="fa-regular fa-calendar"></i>
+                </div>
+                <div class="txn-field-body">
+                    <label class="txn-label">Date</label>
+                    <input type="date" id="transactionDate" class="txn-input" required>
+                </div>
+            </div>
+
+            <!-- INCOME / EXPENSE FIELDS -->
+            <div id="incomeExpenseFields">
+
+                <!-- Category -->
+                <div class="txn-section-label">
+                    <i class="fa-solid fa-tag"></i> Category
+                </div>
+                <div class="category-chip-grid" id="categoryChipGrid">
+                    <!-- populated by JS -->
+                </div>
+                <input type="hidden" id="selectedCategory" value="">
+
+                <!-- Account -->
+                <div class="txn-section-label" style="margin-top:18px;">
+                    <i class="fa-solid fa-wallet"></i> Account
+                </div>
+                <div class="account-chip-row" id="accountChipRow">
+                    <button type="button" class="account-chip active" data-account="Cash">
+                        <i class="fa-solid fa-money-bill-wave"></i> Cash
+                    </button>
+                    <button type="button" class="account-chip" data-account="Card">
+                        <i class="fa-solid fa-credit-card"></i> Card
+                    </button>
+                    <button type="button" class="account-chip" data-account="Bank">
+                        <i class="fa-solid fa-building-columns"></i> Bank
+                    </button>
+                </div>
+                <input type="hidden" id="selectedAccount" value="Cash">
+
+            </div>
+
+            <!-- TRANSFER FIELDS -->
+            <div id="transferFields" style="display:none;">
+
+                <!-- From Account -->
+                <div class="txn-section-label" style="color:var(--orange);">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> From Account
+                </div>
+                <div class="account-chip-row" id="fromAccountChipRow">
+                    <button type="button" class="account-chip active" data-from="Cash">
+                        <i class="fa-solid fa-money-bill-wave"></i> Cash
+                    </button>
+                    <button type="button" class="account-chip" data-from="Card">
+                        <i class="fa-solid fa-credit-card"></i> Card
+                    </button>
+                    <button type="button" class="account-chip" data-from="Bank">
+                        <i class="fa-solid fa-building-columns"></i> Bank
+                    </button>
+                </div>
+                <input type="hidden" id="selectedFromAccount" value="Cash">
+
+                <!-- Arrow divider -->
+                <div class="transfer-arrow">
+                    <i class="fa-solid fa-arrow-down"></i>
+                </div>
+
+                <!-- To Account -->
+                <div class="txn-section-label" style="color:var(--blue);">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i> To Account
+                </div>
+                <div class="account-chip-row" id="toAccountChipRow">
+                    <button type="button" class="account-chip" data-to="Cash">
+                        <i class="fa-solid fa-money-bill-wave"></i> Cash
+                    </button>
+                    <button type="button" class="account-chip active" data-to="Card">
+                        <i class="fa-solid fa-credit-card"></i> Card
+                    </button>
+                    <button type="button" class="account-chip" data-to="Bank">
+                        <i class="fa-solid fa-building-columns"></i> Bank
+                    </button>
+                </div>
+                <input type="hidden" id="selectedToAccount" value="Card">
+
+            </div>
+
+            <!-- Note / Description -->
+            <div class="txn-field-group" style="margin-top:18px;">
+                <div class="txn-field-icon-wrap">
+                    <i class="fa-solid fa-note-sticky"></i>
+                </div>
+                <div class="txn-field-body">
+                    <label class="txn-label">Note / Description</label>
+                    <input type="text" id="transactionDescription" class="txn-input"
+                           maxlength="100" placeholder="e.g. Monthly salary, Grocery run...">
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="modal-actions">
+                <button type="button" class="secondary-button" data-close="transactionModal">Cancel</button>
+                <button type="submit" class="primary-button" id="saveTransactionButton">
+                    <i class="fa-solid fa-check"></i> Save
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+
+<!-- BUDGET MODAL -->
+<div class="modal-overlay" id="budgetModal">
+    <div class="modal small-modal">
+        <div class="modal-header">
+            <div><h2>Set Monthly Budget</h2><p>Choose your spending limit.</p></div>
+            <button class="icon-button close-modal" data-close="budgetModal" aria-label="Close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <form id="budgetForm">
+            <div class="form-group">
+                <label for="monthlyBudgetInput">Monthly Budget (₹)</label>
+                <input type="number" id="monthlyBudgetInput" min="0" max="1000000000" step="0.01" placeholder="e.g. 15000" required>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="secondary-button" data-close="budgetModal">Cancel</button>
+                <button type="submit" class="primary-button">Save Budget</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- SAVINGS GOAL MODAL -->
+<div class="modal-overlay" id="goalModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div><h2 id="goalModalTitle">Create Savings Goal</h2><p>Plan something worth saving for.</p></div>
+            <button class="icon-button close-modal" data-close="goalModal" aria-label="Close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <form id="goalForm">
+            <input type="hidden" id="goalId">
+            <div class="form-group">
+                <label for="goalName">Goal Name</label>
+                <input type="text" id="goalName" maxlength="60" placeholder="e.g. New Laptop" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="goalTarget">Target Amount (₹)</label>
+                    <input type="number" id="goalTarget" min="0.01" max="1000000000" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="goalSaved">Already Saved (₹)</label>
+                    <input type="number" id="goalSaved" min="0" max="1000000000" step="0.01" value="0" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="goalDate">Target Date (Optional)</label>
+                <input type="date" id="goalDate">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="secondary-button" data-close="goalModal">Cancel</button>
+                <button type="submit" class="primary-button">Save Goal</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- GOAL CONTRIBUTION MODAL -->
+<div class="modal-overlay" id="contributionModal">
+    <div class="modal small-modal">
+        <div class="modal-header">
+            <div><h2>Add Savings</h2><p>Add an amount toward your goal.</p></div>
+            <button class="icon-button close-modal" data-close="contributionModal" aria-label="Close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <form id="contributionForm">
+            <input type="hidden" id="contributionGoalId">
+            <div class="form-group">
+                <label for="contributionAmount">Amount (₹)</label>
+                <input type="number" id="contributionAmount" min="0.01" max="1000000000" step="0.01" required>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="secondary-button" data-close="contributionModal">Cancel</button>
+                <button type="submit" class="primary-button">Add Savings</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- FEEDBACK MODAL -->
+<div class="modal-overlay" id="feedbackModal">
+    <div class="modal small-modal">
+        <div class="modal-header">
+            <div><h2>Send Feedback</h2><p>Help us improve Finora for you.</p></div>
+            <button class="icon-button close-modal" data-close="feedbackModal" aria-label="Close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <form id="feedbackForm">
+            <!-- Star Rating -->
+            <div class="form-group">
+                <label>How would you rate Finora?</label>
+                <div class="star-rating" id="starRating">
+                    <button type="button" class="star" data-star="1"><i class="fa-regular fa-star"></i></button>
+                    <button type="button" class="star" data-star="2"><i class="fa-regular fa-star"></i></button>
+                    <button type="button" class="star" data-star="3"><i class="fa-regular fa-star"></i></button>
+                    <button type="button" class="star" data-star="4"><i class="fa-regular fa-star"></i></button>
+                    <button type="button" class="star" data-star="5"><i class="fa-regular fa-star"></i></button>
+                </div>
+                <input type="hidden" id="feedbackRating" value="0">
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select id="feedbackCategory">
+                    <option value="general">General Feedback</option>
+                    <option value="bug">Bug Report</option>
+                    <option value="feature">Feature Request</option>
+                    <option value="design">Design / UI</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="feedbackText">Your Message</label>
+                <textarea id="feedbackText" rows="4" maxlength="500"
+                          placeholder="Tell us what you think..."
+                          style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font:inherit;resize:vertical;outline:none;"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="secondary-button" data-close="feedbackModal">Cancel</button>
+                <button type="submit" class="primary-button">
+                    <i class="fa-solid fa-paper-plane"></i> Submit Feedback
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- NOTIFICATION PANEL -->
+<div class="notification-panel" id="notificationPanel">
+    <div class="panel-header">
+        <h3>Notifications</h3>
+        <button class="icon-button" id="closeNotifications" aria-label="Close notifications">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+    <div id="notificationList"></div>
+</div>
+
+
+<!-- CALCULATOR WIDGET -->
+<div class="calculator-widget" id="calculatorWidget" style="display:none;">
+    <div class="calc-header">
+        <span><i class="fa-solid fa-calculator"></i> Calculator</span>
+        <button class="calc-close-btn" id="closeCalc" aria-label="Close calculator">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+    <div class="calc-display" id="calcDisplay">
+        <div class="calc-expression" id="calcExpression"></div>
+        <div class="calc-result" id="calcResult">0</div>
+    </div>
+    <div class="calc-grid">
+        <button class="calc-btn func" data-val="C">C</button>
+        <button class="calc-btn func" data-val="±">±</button>
+        <button class="calc-btn func" data-val="%">%</button>
+        <button class="calc-btn op" data-val="÷">÷</button>
+
+        <button class="calc-btn" data-val="7">7</button>
+        <button class="calc-btn" data-val="8">8</button>
+        <button class="calc-btn" data-val="9">9</button>
+        <button class="calc-btn op" data-val="×">×</button>
+
+        <button class="calc-btn" data-val="4">4</button>
+        <button class="calc-btn" data-val="5">5</button>
+        <button class="calc-btn" data-val="6">6</button>
+        <button class="calc-btn op" data-val="−">−</button>
+
+        <button class="calc-btn" data-val="1">1</button>
+        <button class="calc-btn" data-val="2">2</button>
+        <button class="calc-btn" data-val="3">3</button>
+        <button class="calc-btn op" data-val="+">+</button>
+
+        <button class="calc-btn span2" data-val="0">0</button>
+        <button class="calc-btn" data-val=".">.</button>
+        <button class="calc-btn eq" data-val="=">=</button>
+    </div>
+</div>
+
+<!-- Calculator FAB -->
+<button class="calc-fab" id="calcFab" aria-label="Open Calculator" title="Calculator">
+    <i class="fa-solid fa-calculator"></i>
+</button>
+
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+
+<script src="script.js"></script>
+</body>
+</html>
