@@ -223,19 +223,30 @@ document.getElementById("startAppBtn").addEventListener("click", () => {
     if (!name) { setError("nameError", "Please enter your name to get started."); return; }
     if (name.length < 2) { setError("nameError", "Name must be at least 2 characters."); return; }
     const userData = { name: name.slice(0, 50), contact: verifiedContact, method: loginMethod };
-    writeStorage(STORAGE_KEYS.user, userData);
+    // Use sessionStorage so session clears on every page refresh/close
+    try { sessionStorage.setItem(STORAGE_KEYS.user, JSON.stringify(userData)); } catch(e) {}
     launchApp(userData);
 });
 
 function checkExistingSession() {
-    const userData = readStorage(STORAGE_KEYS.user, null);
-    if (userData && userData.name) { launchApp(userData); return true; }
+    // sessionStorage clears on refresh — so user must always re-login after refresh
+    try {
+        const raw = sessionStorage.getItem(STORAGE_KEYS.user);
+        if (raw) {
+            const userData = JSON.parse(raw);
+            if (userData && userData.name) { launchApp(userData); return true; }
+        }
+    } catch(e) {}
     return false;
 }
 
 function launchApp(userData) {
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("appContainer").style.display = "";
+
+    // Show calculator FAB only after login
+    const fab = document.getElementById("calcFab");
+    if (fab) fab.style.display = "grid";
 
     document.getElementById("sidebarName").textContent = userData.name;
     document.getElementById("sidebarAvatar").textContent = userData.name.charAt(0).toUpperCase();
@@ -251,7 +262,12 @@ function launchApp(userData) {
 // Logout
 document.getElementById("logoutButton").addEventListener("click", () => {
     if (!confirm("Are you sure you want to logout?")) return;
-    try { localStorage.removeItem(STORAGE_KEYS.user); } catch (e) {}
+    try { sessionStorage.removeItem(STORAGE_KEYS.user); } catch (e) {}
+    // Hide calculator FAB and widget on logout
+    const calcFabEl = document.getElementById("calcFab");
+    const calcWidgetEl = document.getElementById("calculatorWidget");
+    if (calcFabEl) calcFabEl.style.display = "none";
+    if (calcWidgetEl) calcWidgetEl.style.display = "none";
     document.getElementById("appContainer").style.display = "none";
     document.getElementById("loginScreen").style.display = "";
     document.getElementById("gmailInput").value = "";

@@ -2416,7 +2416,7 @@ body.dark-mode .txn-input[type="date"] {
     color: #fff;
     border: none;
     font-size: 20px;
-    display: grid;
+    display: none; /* hidden until login — JS sets display:"" after launchApp() */
     place-items: center;
     cursor: pointer;
     box-shadow: 0 6px 22px rgba(16, 168, 121, 0.45);
